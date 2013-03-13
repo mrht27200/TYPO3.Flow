@@ -49,7 +49,6 @@ class GenericObjectValidator extends AbstractValidator implements ObjectValidato
 	 */
 	public function validate($value) {
 		$this->result = new \TYPO3\Flow\Error\Result();
-
 		if ($this->acceptsEmptyValues === FALSE || $this->isEmpty($value) === FALSE) {
 			if (!is_object($value)) {
 				$this->addError('Object expected, %1$s given.', 1241099149, array(gettype($value)));
@@ -68,13 +67,10 @@ class GenericObjectValidator extends AbstractValidator implements ObjectValidato
 	 * @api
 	 */
 	protected function isValid($object) {
-		$messages = new \TYPO3\Flow\Error\Result();
 		foreach ($this->propertyValidators as $propertyName => $validators) {
 			$propertyValue = $this->getPropertyValue($object, $propertyName);
-			$this->checkProperty($propertyValue, $validators, $messages->forProperty($propertyName));
+			$this->checkProperty($propertyValue, $validators, $propertyName);
 		}
-		$this->result = $messages;
-
 		return;
 	}
 
@@ -105,9 +101,7 @@ class GenericObjectValidator extends AbstractValidator implements ObjectValidato
 	 */
 	protected function getPropertyValue($object, $propertyName) {
 		if ($object instanceof \Doctrine\ORM\Proxy\Proxy) {
-			$reflectionLoadMethod = new \ReflectionMethod($object, '__load');
-			$reflectionLoadMethod->setAccessible(TRUE);
-			$reflectionLoadMethod->invoke($object);
+			$object->__load();
 		}
 
 		if (\TYPO3\Flow\Reflection\ObjectAccess::isPropertyGettable($object, $propertyName)) {
@@ -123,15 +117,25 @@ class GenericObjectValidator extends AbstractValidator implements ObjectValidato
 	 *
 	 * @param mixed $value The value to be validated
 	 * @param array $validators The validators to be called on the value
-	 * @param \TYPO3\Flow\Error\Result $messages the result object to which the validation errors should be added
 	 * @return void
 	 */
-	protected function checkProperty($value, $validators, \TYPO3\Flow\Error\Result $messages) {
+	protected function checkProperty($value, $validators, $propertyName) {
+		$result = NULL;
 		foreach ($validators as $validator) {
 			if ($validator instanceof ObjectValidatorInterface) {
 				$validator->setValidatedInstancesContainer($this->validatedInstancesContainer);
 			}
-			$messages->merge($validator->validate($value));
+			$tmpResult = $validator->validate($value);
+			if ($tmpResult->hasMessages()) {
+				if ($result == NULL) {
+					$result = $tmpResult;
+				} else {
+					$result->merge($tmpResult);
+				}
+			}
+		}
+		if ($result != NULL) {
+			$this->result->forProperty($propertyName)->merge($result);
 		}
 	}
 
