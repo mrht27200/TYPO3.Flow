@@ -73,6 +73,13 @@ Flow_Object_Classes:
 Flow_Object_Configuration:
   backend: TYPO3\Flow\Cache\Backend\SimpleFileBackend
 
+# Flow_Persistence_Doctrine
+#
+# This cache contains meta data for the Doctrine ORM. It is used only in case the Doctrine
+# cache is set to use the Flow CacheAdapter.
+Flow_Persistence_Doctrine:
+  backend: TYPO3\Flow\Cache\Backend\SimpleFileBackend
+
 # Flow_Reflection*
 #
 #
