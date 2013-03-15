@@ -301,6 +301,17 @@ class ObjectManager implements ObjectManagerInterface {
 	}
 
 	/**
+	 * Returns TRUE if this object manager already has an instance for the specified
+	 * object.
+	 *
+	 * @param string $objectName The object name
+	 * @return boolean TRUE if an instance already exists
+	 */
+	public function hasInstance($objectName) {
+		return isset($this->objects[$objectName]);
+	}
+
+	/**
 	 * Unsets the instance of the given object
 	 *
 	 * If run during standard runtime, the whole application might become unstable

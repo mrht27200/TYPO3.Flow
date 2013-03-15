@@ -12,6 +12,7 @@ namespace TYPO3\Flow\Mvc\Controller;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Object\DependencyInjection\DependencyProxy;
 
 /**
  * A controller argument
@@ -291,8 +292,8 @@ class Argument {
 	 * @api
 	 */
 	public function getPropertyMappingConfiguration() {
-		if ($this->propertyMappingConfiguration === NULL) {
-			$this->propertyMappingConfiguration = new \TYPO3\Flow\Mvc\Controller\MvcPropertyMappingConfiguration();
+		if ($this->propertyMappingConfiguration instanceof DependencyProxy) {
+			$this->propertyMappingConfiguration->_activateDependency();
 		}
 		return $this->propertyMappingConfiguration;
 	}
